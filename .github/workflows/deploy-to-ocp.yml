@@ -16,7 +16,9 @@ jobs:
 
       - name: Install CLI tools from OpenShift Mirror
         uses: redhat-actions/openshift-tools-installer@v1
-        
+        with:
+          # "mirror" is the default source, so this is optional.
+          source: "mirror"
       # 2. Log in to OpenShift
       - name: Log in to OpenShift
         uses: redhat-actions/oc-login@v1
