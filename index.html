@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ticket Sale</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+    .event {
+      margin-bottom: 15px;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+    .event h3 {
+      margin: 0;
+    }
+    .event button {
+      margin-top: 10px;
+      padding: 5px 10px;
+      cursor: pointer;
+    }
+    .success, .error {
+      margin-top: 15px;
+      padding: 10px;
+      border-radius: 5px;
+      font-weight: bold;
+    }
+    .success {
+      background-color: #d4edda;
+      color: #155724;
+    }
+    .error {
+      background-color: #f8d7da;
+      color: #721c24;
+    }
+  </style>
+</head>
+<body>
+  <h1>Welcome to Ticket Sale</h1>
+  <div id="events"></div>
+  <script>
+    const API_BASE_URL = "http://localhost:8080"; // Backend URL
+
+    // Fetch events from the API and render them
+    async function fetchEvents() {
+      const eventsContainer = document.getElementById("events");
+      eventsContainer.innerHTML = "Loading events...";
+
+      try {
+        const response = await fetch(`${API_BASE_URL}/events`);
+        const events = await response.json();
+
+        eventsContainer.innerHTML = ""; // Clear loading text
+        Object.keys(events).forEach(eventId => {
+          const event = events[eventId];
+          const eventDiv = document.createElement("div");
+          eventDiv.className = "event";
+          eventDiv.innerHTML = `
+            <h3>${event.name}</h3>
+            <p>Tickets Available: <strong>${event.tickets_available}</strong></p>
+            <input type="number" id="ticket-count-${eventId}" placeholder="Number of tickets" min="1">
+            <button onclick="purchaseTickets('${eventId}')">Buy Tickets</button>
+          `;
+          eventsContainer.appendChild(eventDiv);
+        });
+      } catch (error) {
+        eventsContainer.innerHTML = `<p class="error">Failed to load events. Please try again later.</p>`;
+        console.error("Error fetching events:", error);
+      }
+    }
+
+    // Purchase tickets for a specific event
+    async function purchaseTickets(eventId) {
+      const ticketCountInput = document.getElementById(`ticket-count-${eventId}`);
+      const tickets = parseInt(ticketCountInput.value, 10);
+
+      if (!tickets || tickets <= 0) {
+        alert("Please enter a valid number of tickets.");
+        return;
+      }
+
+      try {
+        const response = await fetch(`${API_BASE_URL}/events/${eventId}/purchase`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ tickets })
+        });
+
+        const result = await response.json();
+        if (response.ok) {
+          alert(result.message);
+          fetchEvents(); // Refresh event data
+        } else {
+          alert(`Error: ${result.error}`);
+        }
+      } catch (error) {
+        alert("Failed to complete the purchase. Please try again later.");
+        console.error("Error purchasing tickets:", error);
+      }
+    }
+
+    // Initial fetch of events
+    fetchEvents();
+  </script>
+</body>
+</html>

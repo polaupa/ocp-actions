@@ -5,8 +5,8 @@ on:
     branches:
       - main
 env:
-  IMAGE_NAME: "hello-world-app"
-  TAG: "latest"
+  IMAGE_NAME: "rock-concert"
+  TAG: "${{ github.sha }}"
   NAMESPACE: "github-test-1"
   REGISTRY_BASE: "quay.io/${{ secrets.QUAY_USER }}"
 
