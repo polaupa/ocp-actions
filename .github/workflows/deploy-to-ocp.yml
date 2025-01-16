@@ -1,9 +1,15 @@
 name: Build and Deploy to OpenShift
 
 on:
-  push:
-    branches:
-      - main
+  workflow_dispatch:
+    inputs:
+      branches:
+        type: choice
+        description: 'Branch to deploy'
+        default: 'main'
+        options:
+          - 'main'
+          - 'develop'
 
 jobs:
   build-and-deploy:
@@ -18,6 +24,7 @@ jobs:
         uses: redhat-actions/openshift-tools-installer@v1
         with:
           oc: latest
+    
       # 2. Log in to OpenShift
       - name: Log in to OpenShift
         uses: redhat-actions/oc-login@v1
@@ -27,20 +34,13 @@ jobs:
 
       # 3. Build the Docker image
       - name: Build Docker image
-        run: docker build -t hello-world-app .
-
-      # 4. Tag the image for OpenShift registry
-      - name: Tag Docker image for OpenShift
-        run: |
-          REGISTRY=$(oc get route -n openshift-image-registry default-route --template='{{ .spec.host }}')
-          docker tag hello-world-app:latest $REGISTRY/my-project/hello-world-app:latest
+        run: podman build -t hello-world-app .
 
       # 5. Push the image to the OpenShift internal registry
       - name: Push Docker image to OpenShift registry
         run: |
-          REGISTRY=$(oc get route -n openshift-image-registry default-route --template='{{ .spec.host }}')
-          docker login -u $(oc whoami) -p $(oc whoami -t) $REGISTRY
-          docker push $REGISTRY/my-project/hello-world-app:latest
+          podman login -u ${{ secrets.QUAY_USER }} -p ${{ secrets.QUAY_PASSWORD }}) quay.io
+          podman push quay.io/${{ secrets.QUAY_USER }}/hello-world-app:latest
 
       # 6. Deploy the application in OpenShift
       - name: Deploy application in OpenShift
