@@ -6,7 +6,7 @@ on:
       - main
 env:
   IMAGE_NAME: "hello-world-app"
-  TAG: "latest ${{ github.sha }}"
+  TAG: "latest"
   NAMESPACE: "github-test-1"
   REGISTRY_BASE: "quay.io/${{ secrets.QUAY_USER }}"
 
@@ -15,7 +15,6 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Checkout the repository
       - name: Checkout code
         uses: actions/checkout@v2
 
@@ -32,7 +31,7 @@ jobs:
           openshift_token: ${{ secrets.OPENSHIFT_TOKEN }}
           namespace: ${{ env.NAMESPACE }}
     
-      - name: Build Docker image with Buildah
+      - name: Build Docker image
         id: build-image
         uses: redhat-actions/buildah-build@v2
         with:
