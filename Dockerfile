@@ -12,6 +12,7 @@ COPY index.html /app/
 
 # Install dependencies
 RUN pip3 install flask
+RUN pip3 install flask-cors
 
 # Expose port
 EXPOSE 8080
