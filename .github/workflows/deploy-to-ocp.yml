@@ -1,4 +1,4 @@
-name: Deploy to OpenShift
+name: Build and Deploy to OpenShift
 
 on:
   push:
@@ -14,28 +14,33 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      # 2. Build the Docker image
-      - name: Build Docker image
-        run: docker compose -f deploy/docker/compose.yaml build
-
-      # 3. Log in to the container registry
-      - name: Log in to Docker registry
-        run: docker login -u ${{secrets.OPENSHIFT_USER }} -p ${{secrets.OPENSHIFT_TOKEN }} ${{secrets.OPENSHIFT_IMAGE_REGISTRY }}
-
-
-      # 4. Push the image to the registry
-      - name: Push Docker image
-        run: docker push my-image:latest
-
-      # 5. Set up OpenShift CLI
-      - name: Set up OpenShift CLI
+      # 2. Log in to OpenShift
+      - name: Log in to OpenShift
         uses: redhat-actions/oc-login@v1
         with:
           openshift_server_url: ${{ secrets.OPENSHIFT_SERVER }}
           openshift_token: ${{ secrets.OPENSHIFT_TOKEN }}
 
-      # 6. Deploy to OpenShift
-      - name: Deploy to OpenShift
+      # 3. Build the Docker image
+      - name: Build Docker image
+        run: docker build -t hello-world-app .
+
+      # 4. Tag the image for OpenShift registry
+      - name: Tag Docker image for OpenShift
         run: |
-          oc new-app my-image:latest --name=stocklet-app
-          oc expose svc/stocklet-app
+          REGISTRY=$(oc get route -n openshift-image-registry default-route --template='{{ .spec.host }}')
+          docker tag hello-world-app:latest $REGISTRY/my-project/hello-world-app:latest
+
+      # 5. Push the image to the OpenShift internal registry
+      - name: Push Docker image to OpenShift registry
+        run: |
+          REGISTRY=$(oc get route -n openshift-image-registry default-route --template='{{ .spec.host }}')
+          docker login -u $(oc whoami) -p $(oc whoami -t) $REGISTRY
+          docker push $REGISTRY/my-project/hello-world-app:latest
+
+      # 6. Deploy the application in OpenShift
+      - name: Deploy application in OpenShift
+        run: |
+          oc project github-test-1
+          oc new-app my-project/hello-world-app:latest --name=hello-world-app || true
+          oc expose svc/hello-world-app || true
