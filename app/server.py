@@ -1,7 +1,9 @@
 from flask import Flask, jsonify, request, send_from_directory
+from flask_cors import CORS
 import os
 
 app = Flask(__name__)
+CORS(app)
 
 # Mock data for events
 events = {
