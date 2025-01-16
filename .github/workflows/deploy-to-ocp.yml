@@ -1,5 +1,9 @@
 name: Build and Deploy to OpenShift
 
+env:
+  IMAGE_NAME: "startup-live-events"
+  NAMESPACE: "github-test-1"
+
 on:
   workflow_dispatch:
     inputs:
@@ -16,7 +20,6 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Checkout the repository
       - name: Checkout code
         uses: actions/checkout@v2
 
@@ -25,26 +28,21 @@ jobs:
         with:
           oc: latest
     
-      # 2. Log in to OpenShift
       - name: Log in to OpenShift
-        uses: redhat-actions/oc-login@v1
-        with:
-          openshift_server_url: ${{ secrets.OPENSHIFT_SERVER }}
-          openshift_token: ${{ secrets.OPENSHIFT_TOKEN }}
-
-      # 3. Build the Docker image
+        run: |
+          oc login --token=${{ secrets.OPENSHIFT_TOKEN }} --server=${{ secrets.OPENSHIFT_SERVER }}
+          oc project ${{ env.NAMESPACE }}
+      
       - name: Build Docker image
-        run: podman build -t hello-world-app .
+        run: podman build -t ${{ env.IMAGE_NAME }} .
 
-      # 5. Push the image to the OpenShift internal registry
       - name: Push Docker image to OpenShift registry
         run: |
           podman login -u ${{ secrets.QUAY_USER }} -p ${{ secrets.QUAY_PASSWORD }}) quay.io
-          podman push quay.io/${{ secrets.QUAY_USER }}/hello-world-app:latest
+          podman push quay.io/${{ secrets.QUAY_USER }}/${{ env.IMAGE_NAME }}:latest
 
-      # 6. Deploy the application in OpenShift
       - name: Deploy application in OpenShift
         run: |
           oc project github-test-1
-          oc new-app my-project/hello-world-app:latest --name=hello-world-app || true
-          oc expose svc/hello-world-app || true
+          oc new-app ${{ env.NAMESPACE }}/${{ env.IMAGE_NAME }}:latest --name=${{ env.IMAGE_NAME }} || true
+          oc expose svc/${{ env.IMAGE_NAME }} || true

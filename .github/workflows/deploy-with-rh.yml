@@ -5,7 +5,7 @@ on:
     branches:
       - main
 env:
-  IMAGE_NAME: "rock-concert"
+  IMAGE_NAME: "startup-live-events"
   TAG: "${{ github.sha }}"
   NAMESPACE: "github-test-1"
   REGISTRY_BASE: "quay.io/${{ secrets.QUAY_USER }}"
@@ -23,7 +23,6 @@ jobs:
         with:
           oc: latest
     
-      # 2. Log in to OpenShift
       - name: Log in to OpenShift
         uses: redhat-actions/oc-login@v1
         with:

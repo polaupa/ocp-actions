@@ -1,21 +1,16 @@
-# Base image
+
 FROM python:3.9-slim
 
-# Set working directory
 WORKDIR /app
 
-# Copy backend files
 COPY app/ /app/
 
-# Copy frontend files
 COPY index.html /app/
 
-# Install dependencies
 RUN pip3 install flask
+# Cross-Origin Resource Sharing (CORS) is a security feature that allows restricting resources on a web page to be requested from another domain outside the domain from which the first resource was served.
 RUN pip3 install flask-cors
 
-# Expose port
 EXPOSE 8080
 
-# Start the backend server
 CMD ["python3", "server.py"]
