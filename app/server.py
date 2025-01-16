@@ -37,4 +37,4 @@ def purchase_tickets(event_id):
 
 # Run the app
 if __name__ == "__main__":
-    app.run(host="http://rock-concert-github-test-1.apps.67853a4ffeba7dc9c41f3374.ocp.techzone.ibm.com", port=8080)
+    app.run(host="0.0.0.0", port=8080)
