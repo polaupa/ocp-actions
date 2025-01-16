@@ -1,0 +1,41 @@
+name: Deploy to OpenShift
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Checkout the repository
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      # 2. Build the Docker image
+      - name: Build Docker image
+        run: docker build -t my-image:latest .
+
+      # 3. Log in to the container registry
+      - name: Log in to Docker registry
+        run: docker login -u ${{secrets.OPENSHIFT_USER }} -p ${{secrets.OPENSHIFT_TOKEN }} ${{secrets.OPENSHIFT_IMAGE_REGISTRY }}
+
+
+      # 4. Push the image to the registry
+      - name: Push Docker image
+        run: docker push my-image:latest
+
+      # 5. Set up OpenShift CLI
+      - name: Set up OpenShift CLI
+        uses: redhat-actions/oc-login@v1
+        with:
+          openshift_server_url: ${{ secrets.OPENSHIFT_SERVER }}
+          openshift_token: ${{ secrets.OPENSHIFT_TOKEN }}
+
+      # 6. Deploy to OpenShift
+      - name: Deploy to OpenShift
+        run: |
+          oc new-app my-image:latest --name=stocklet-app
+          oc expose svc/stocklet-app
