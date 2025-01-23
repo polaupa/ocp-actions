@@ -9,7 +9,7 @@ COPY index.html /app/
 
 RUN pip3 install flask
 # Cross-Origin Resource Sharing (CORS) is a security feature that allows restricting resources on a web page to be requested from another domain outside the domain from which the first resource was served.
-RUN pip3 install flask-cors
+# RUN pip3 install flask-cors
 
 EXPOSE 8080
 

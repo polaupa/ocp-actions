@@ -1,9 +1,9 @@
 from flask import Flask, jsonify, request, send_from_directory
-from flask_cors import CORS
+# from flask_cors import CORS
 import os
 
 app = Flask(__name__)
-CORS(app)
+# CORS(app)
 
 events = {
     "1": {"name": "Rock Concert", "tickets_available": 20000},
