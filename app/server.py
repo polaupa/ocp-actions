@@ -5,11 +5,10 @@ import os
 app = Flask(__name__)
 CORS(app)
 
-# Mock data for events
 events = {
-    "1": {"name": "Rock Concert", "tickets_available": 100},
-    "2": {"name": "Tech Conference", "tickets_available": 50},
-    "3": {"name": "Art Exhibition", "tickets_available": 20}
+    "1": {"name": "Rock Concert", "tickets_available": 20000},
+    "2": {"name": "Tech Conference", "tickets_available": 5000},
+    "3": {"name": "Art Exhibition", "tickets_available": 100}
 }
 
 # Serve the frontend file
